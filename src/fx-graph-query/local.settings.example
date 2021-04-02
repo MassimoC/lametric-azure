@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "ApiEndpoint": "https://apiendpoint.azurewebsites.net/api/subs/{subscriptionId}",
+
+    "Observability:InstrumentationKey": "--instrumentation--key--",
+
+    "SubscriptionIdentifiers:0": "--subscriptionId--1--",
+    "SubscriptionIdentifiers:1": "--subscriptionId--2--",
+
+    "AzCredentials:ClientId": "--client-id-here--",
+    "AzCredentials:ClientSecret": "--client-secret-here--",
+    "AzCredentials:TenantId": "--tenent-id-here--"
+  }
+}
