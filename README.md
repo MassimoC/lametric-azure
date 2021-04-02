@@ -1,6 +1,9 @@
 # lametric-azure
 Example on how to use Azure functions to count the resources provisioned in a subscription and maintain the state using Azure Durable Entities.
-The architecture is pretty straightforward
+
+The architecture is pretty straightforward:
+
+![](img/overview.png)
 
 ## e2e visibility with Application Insights
 Arcus.Observability is used to simplify the integration with Application Insights.
