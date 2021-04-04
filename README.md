@@ -1,6 +1,8 @@
 # lametric-azure
 **Context** : I want to keep an eye on how many resources are currently provisioned on a specific Azure subscription and understand when we are adding or removing resources.
 
+I recently got a [LaMetric Time](https://lametric.com/en-US) device which can be easily configured to poll an HTTP endpoint and it was quite a while I wanted to play a bit with Azure Durable Entities that's why I assembled this simple integration.
+
 The architecture is pretty straightforward:
 
 ![](img/overview.png)
@@ -24,7 +26,7 @@ The entity state looks as the following:
 }
 ```
 
-The result returned to the LaMetric device is formatted this way:
+The output of the GET call returned to the LaMetric device is formatted this way:
 
 ```
 {
@@ -40,7 +42,9 @@ The result returned to the LaMetric device is formatted this way:
     ]
 }
 ```
+Here the final result.
 
+![](img/lametric-azure.gif)
 
 ## e2e visibility with Application Insights
 Arcus.Observability is used to simplify the integration with Application Insights.
@@ -54,7 +58,10 @@ Arcus.Observability is used to simplify the integration with Application Insight
 - Entities guarantee that requests are processed in series.
 - Entities are triggered via 'control' queues (default 4) prefixed with the {[task-hub-name](https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-task-hubs?tabs=csharp)}. 
     -  Only a single Azure Function instance can read from a single queue at a certain time. This is guarantee by the blob leases approach of the durable framework.
-    - from a scale prospective, 4 queues means maximum 4 azure function instances.
+    - from a scale prospective, 4 queues means maximum 4 azure function instances. In my case 1 function instance interacted with two queues.
+    
+    ![](img/used_queues.png)
+    
     - the Functions scale controller add/remove instances according to the queue latency for peeking messages.
     
     ![](img/queues.png)
