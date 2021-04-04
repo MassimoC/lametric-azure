@@ -1,9 +1,46 @@
 # lametric-azure
-Example on how to use Azure functions to count the resources provisioned in a subscription and maintain the state using Azure Durable Entities.
+**Context** : I want to keep an eye on how many resources are currently provisioned on a specific Azure subscription and understand when we are adding or removing resources.
 
 The architecture is pretty straightforward:
 
 ![](img/overview.png)
+
+In this example I am using  Azure functions to query the Azure Resource Graph to count the resources using a simple query like the following: 
+```
+Resources | summarize count()
+```
+The result of the query is persisted using an Azure Durable Entity function activated via an HTTP.
+
+The entity state looks as the following:
+```
+{
+    "entityExists": true,
+    "entityState": {
+        "Name": null,
+        "PreviousRead": 575,
+        "LastRead": 571,
+        "UpdatedOn": "2021-04-01T19:44:04.5683114Z"
+    }
+}
+```
+
+The result returned to the LaMetric device is formatted this way:
+
+```
+{
+    "frames": [
+        {
+            "text": "-4", // increment
+            "icon": 124 // up or down icon
+        },
+        {
+            "text": "571", // last read
+            "icon": 37287 // azure icon
+        }
+    ]
+}
+```
+
 
 ## e2e visibility with Application Insights
 Arcus.Observability is used to simplify the integration with Application Insights.
