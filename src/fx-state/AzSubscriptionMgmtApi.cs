@@ -1,5 +1,6 @@
 ﻿using fx_state.DTOs;
 using fx_state.Entities;
+using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -14,16 +15,25 @@ using System.Threading.Tasks;
 
 namespace fx_state
 {
-    public static class AzSubscriptionMgmtApi
+    public class AzSubscriptionMgmtApi
     {
+
+        private readonly ILogger<AzSubscriptionMgmtApi> _logger;
+
+
+        public AzSubscriptionMgmtApi(ILogger<AzSubscriptionMgmtApi> logger)
+        {
+            Guard.NotNull(logger, nameof(logger));
+            _logger = logger;
+        }
+
         [FunctionName("Get_SubscriptionState")]
-        public static async Task<IActionResult> GetSubscriptionDetails(
+        public async Task<IActionResult> GetSubscriptionDetails(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "subs/{subName}")] HttpRequest req,
             [DurableClient] IDurableEntityClient client,
-            string subName,
-            ILogger log)
+            string subName)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
 
 
             var entityId = new EntityId(nameof(SubscriptionState), subName);
@@ -41,14 +51,13 @@ namespace fx_state
         }
 
         [FunctionName("Update_SubscriptionState")]
-        public static async Task<IActionResult> SetValues(
+        public async Task<IActionResult> SetValues(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "subs/{subName}")] HttpRequest req,
             [DurableClient] IDurableEntityClient client,
-            string subName,
-            ILogger log)
+            string subName)
         {
 
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
             string reqBody = await new StreamReader(req.Body).ReadToEndAsync();
             if (String.IsNullOrEmpty(reqBody)) return new BadRequestObjectResult("invalid message");
 
@@ -63,7 +72,7 @@ namespace fx_state
 
         }
 
-        private static LaMetricResult GetLaMetricResult(EntityStateResponse<SubscriptionState> state)
+        private LaMetricResult GetLaMetricResult(EntityStateResponse<SubscriptionState> state)
         {
 
             var increment = state.EntityState.LastRead - state.EntityState.PreviousRead;
@@ -74,11 +83,13 @@ namespace fx_state
                 String.Format("+{0}", increment.ToString()) :
                 String.Format("{0}", increment.ToString());
 
-            var lametricResult = new LaMetricResult();
-            lametricResult.Frames = new List<LaMetricText>
+            var lametricResult = new LaMetricResult
             {
-               new LaMetricText { IconCode=icon, Text=lmText },
-               new LaMetricText { IconCode=LaMetricIcon.Azure, Text=state.EntityState.LastRead.ToString() }
+                Frames = new List<LaMetricText>
+                {
+                   new LaMetricText { IconCode=icon, Text=lmText },
+                   new LaMetricText { IconCode=LaMetricIcon.Azure, Text=state.EntityState.LastRead.ToString() }
+                }
             };
 
             return lametricResult;

@@ -62,6 +62,13 @@ namespace fx_graph_query
                     string totalAzResources = rows[0]?.ToString(Formatting.None).Replace("[","").Replace("]", "");
                     _logger.LogInformation($"Total resources found: {totalAzResources}");
 
+                    var metricContext = new Dictionary<string, object>
+                    {
+                        {"FX-Subscription", subscriptionIds[0]}
+                    };
+
+                    _logger.LogMetric("FX-ResourceCount", Convert.ToInt32(totalAzResources), metricContext);
+
                     var httpContent = new StringContent(totalAzResources, Encoding.UTF8, "text/plain");
 
                     var response = await Policy
